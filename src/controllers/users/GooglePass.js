@@ -5,8 +5,8 @@ import jwt from "jsonwebtoken";
 export const PassGoogleSuccess=async(req,res,next)=>{
     const saltRounds=10;
     const userData = req?.user?._json; 
-
-
+    console.log(req)
+     console.log(res)
     // isAuthenticated function provide by passport
     if (req.isAuthenticated()) {
         // Here you can perform database operations, handle user creation, or return the user profile
