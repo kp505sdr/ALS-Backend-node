@@ -1,43 +1,44 @@
-import mongoose from "mongoose"
+// Import mongoose correctly
+import mongoose from 'mongoose';
 
-
-const userModels= new mongoose.Schema({
-  
-  name:{
-     type:String,
-   },
-  
-   email:{
-    type:String,
-    required:true
+// Define the user schema
+const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
   },
-  mobile:{
-    type:Number,
- 
+  email: {
+    type: String,
+    required: true,
   },
-
-  profilepic:{
-    type:String,
+  mobile: {
+    type: Number,
   },
-
-  isAdmin:{
-    type:Boolean,
-    default:false,
+  profilepic: {
+    type: String,
   },
-  socialMedia:{
-    type:Array,  
+  isAdmin: {
+    type: Boolean,
+    default: false,
   },
-  gender:{
-type:String
+  verificationCode: {
+    type: String, // Assuming verification code is a string
   },
-  password:{
-    type:String,
-    required:true
-   
+  email_verified: {
+    type: Boolean,
+    default: false,
   },
 
+  socialMedia: {
+    type: Object,
+  },
+  gender: {
+    type: String,
+  },
+  password: {
+    type: String,
+    required: true,
+  },
+});
 
-
- 
-})
-export default mongoose.model("User",userModels)
+// Create and export the User model
+export default mongoose.model('User', userSchema);

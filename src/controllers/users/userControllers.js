@@ -1,10 +1,55 @@
 import User from "../../models/userModels.js";
 import bcrypt from "bcrypt";
+import { check } from "express-validator";
 import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
 
 export const userRegistration = async (req, res) => {
   const saltRounds = 10;
   const { name, email, password, confpassword } = req.body;
+
+  // ------------send mail to verify----start------------
+  const sendVerifyMail = async (name, email, id) => {
+        //temp token for email verification
+        const token = jwt.sign({ email: email }, process.env.JWT_SECRET, {
+          expiresIn: "1y",
+        });
+    try {
+      const transporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false,
+        requireTLS: true,
+        // pass=fkqy tacy tith clcu
+        service: "gmail",
+        auth: {
+          user: "kctech4you@gmail.com",
+          pass: "fkqytacytithclcu",
+        },
+      });
+      const mailOptions = {
+        from: "kctech4you@gmail.com",
+        to: email,
+        subject: "For Verification Mail",
+        html:
+          '<p>Hi" ' +
+          name +
+          '  ",Please click on given link to <a href="http://localhost:3000/verify/' +
+          id +'/'+ token +
+          '"> Verify </a> your mail.</p>',
+      };
+      transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log("email has been sent:-", info.response);
+        }
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+  // ------------send mail to verify- end---------------
 
   try {
     if (name && email && password && confpassword) {
@@ -19,24 +64,31 @@ export const userRegistration = async (req, res) => {
       // Hash the password
       bcrypt.hash(password, saltRounds, async (err, hashPass) => {
         if (err) {
-          return res.status(400).json({ message: "Error hashing password" + err});
+          return res
+            .status(400)
+            .json({ message: "Error hashing password" + err });
         }
+    
 
         // Create a new user object
         const userdata = new User({
           name,
           email,
           password: hashPass,
-
+   
         });
 
         try {
           // Save the user to the database
           userdata.save();
-          res.status(200).json({ message: "Registration succss" ,userdata});
+          sendVerifyMail(name, email, userdata._id); //nodemailer fun call
+
+          res.status(200).json({ message: "Registration succss", userdata });
         } catch (error) {
           console.log(error);
-          res.status(400).json({ message: "Error During user registration",error });
+          res
+            .status(400)
+            .json({ message: "Error During user registration", error });
         }
       });
     } else {
@@ -44,67 +96,181 @@ export const userRegistration = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ message: "Registration failed!",error });
+    res.status(400).json({ message: "Registration failed!", error });
+  }
+};
+// ------------------verify mail-- start---------
+
+export const verifyemail = async (req, res) => {
+  try {
+    const updateInfo = await User.updateOne(
+      { _id: req.params.id },
+      { $set: { email_verified: true, tempToken: "" } }
+    );
+
+    return res
+      .status(200)
+      .json({ message: "Email verified successfully", updateInfo });
+  } catch (error) {
+    console.error(error.message);
+
+    return res
+      .status(500)
+      .json({ message: "Email verification failed OR Internal server error" });
+  }
+};
+// ------------------verify mail-- end---------
+
+
+
+//-------------------send email for forget password ---------start-----------
+export const ForgetPassword = async (req, res) => {
+  try {
+    // Assuming you receive the user's email address in the request body
+    const { email } = req.body;
+
+    // Check if the email exists in the database
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Generate a password reset token
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: '1h' // Set the token expiration time, e.g., 1 hour
+    });
+
+    // Send the password reset link to the user's email address
+    const transporter = nodemailer.createTransport({
+      // Configure nodemailer transporter (e.g., SMTP, SendGrid, etc.)
+      // Example configuration for Gmail SMTP:
+       host: "smtp.gmail.com",
+        port: 587,
+        secure: false,
+        requireTLS: true,
+        service: "gmail",
+      auth: {
+        user: "kctech4you@gmail.com",
+          pass: "fkqytacytithclcu",
+      }
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USERNAME,
+      to: email,
+      subject: 'Password Reset',
+      html: `<p>Hi ${user.name},</p>
+             <p>Please click <a href="${process.env.BASE_URL}/resetpassword/${token}">here</a> to reset your password.</p>
+             <p>If you didn't request this, please ignore this email.</p>`
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error sending email:', error);
+        return res.status(500).json({ message: 'Failed to send reset password email' });
+      }
+      console.log('Reset password email sent:', info.response);
+      res.status(200).json({ message: 'Reset password email sent successfully' });
+    });
+  } catch (error) {
+    console.error('ForgetPassword error:', error.message);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
+//------------------send email for---forget ----pass ---end
+
+
+// ---------------reset----passwor---- and save-----start--------------------
+export const ResetPassword = async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    // Verify the token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Check if the token contains the userId
+    if (!decoded.userId) {
+      return res.status(400).json({ message: 'Invalid token' });
+    }
+
+    // Find the user by userId
+    const user = await User.findById(decoded.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the user's password
+    user.password = hashedPassword;
+    await user.save();
+
+    // Optionally, you can expire the token after password reset
+    // You may want to implement a mechanism to delete the token from the database
+
+    res.status(200).json({ message: 'Password reset successfully' });
+  } catch (error) {
+    console.error('ResetPassword error:', error.message);
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      return res.status(400).json({ message: 'Invalid or expired token' });
+    }
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+//reste--pass--and --save ---end-------------------------
+
+
 
 //-------------------get all user-------------------------------------------------
-export const getAllUsers=async(req,res)=>{
-try {
-  const allUsers=await User.find()
-  if(allUsers){
-   res.json(allUsers);
+export const getAllUsers = async (req, res) => {
+  try {
+    const allUsers = await User.find();
+    if (allUsers) {
+      res.json(allUsers);
+    }
+  } catch (error) {
+    return res.status(400).json({ message: "Fetching data failed!", error });
   }
-  
-} catch (error) {
- return res.status(400).json({ message: "Fetching data failed!",error });
-}
-}
+};
 
 // -----------------update user profile--------------------------------------------
 
+export const updateUserProfile = async (req, res) => {
+  const { name, gender, mobile, profilepic, address, socialMedia } = req.body;
 
-export const updateUserProfile=async(req,res)=>{
-  
-const {name,gender,mobile,profilepic,address,socialMedia}=req.body
-  
   try {
+    
     // Find the user by ID and update the profile
-    const user=await User.findById(req.params.id);
-     if(!user){
-      res.json({message:"User Not Found"})
-     }else{
-          // Update user profile with data from request body
-    if (name) user.name = name;
-    if (gender) user.gender = gender;
-    if (mobile) user.mobile = mobile;
-    if (profilepic) user.profilepic = profilepic;
-    if (address) user.address = address;
-    if (socialMedia) user.socialMedia = socialMedia;
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      res.json({ message: "User Not Found" });
+    } else {
+      // Update user profile with data from request body
+      if (name) user.name = name;
+      if (gender) user.gender = gender;
+      if (mobile) user.mobile = mobile;
+      if (profilepic) user.profilepic = profilepic;
+      if (address) user.address = address;
+      if (socialMedia) user.socialMedia = socialMedia;
 
-    // Save the updated user profile
-    const updatedUser = await user.save();
+      // Save the updated user profile
+      const updatedUser = await user.save();
 
-    res.status(200).json(updatedUser)
-     }
-   
-
+      res.status(200).json(updatedUser);
+    }
   } catch (error) {
     console.log(error);
     return res.status(400).json({ message: "Error updating user profile" });
   }
-}
-
-
-
-
+};
 
 // --------------------------user login--------------------------------------------
 
-export const userLogin=async(req,res)=>{
-
-
+export const userLogin = async (req, res) => {
   const { email, password } = req.body;
   try {
     // Find the user by email
@@ -112,16 +278,21 @@ export const userLogin=async(req,res)=>{
     if (!validUser) {
       return res.status(400).json({ message: "User Not Found" });
     }
-    if(!password){
+    if (!password) {
       return res.status(400).json({ message: "Enter the Password" });
     }
-    
+
     // Compare the provided password with the hashed password in the database
     bcrypt.compare(password, validUser.password, (err, result) => {
       if (err) {
         // Handle bcrypt compare error
         console.error("Error comparing passwords:", err);
         return res.status(500).json({ message: "Internal Server Error" });
+      }
+      if (!validUser.email_verified) {
+        return res.status(400).json({
+          message: " first you need to verify your email, link has been sent..",
+        });
       }
       if (result) {
         // Passwords match, generate JWT token
@@ -151,6 +322,8 @@ export const userLogin=async(req,res)=>{
   }
 };
 
+
+
 // ----------------delete user by admin--------------------------
 
 export const deleteUser = async (req, res) => {
@@ -166,6 +339,4 @@ export const deleteUser = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
   }
-}
-
-
+};

@@ -14,6 +14,7 @@ try {
       return res.status(403).json({ message: "Forbidden: Invalid token" });
     }
     req.authData = authData;
+
     next();
   });
 
