@@ -10,7 +10,7 @@ import {PassGoogleFailure, PassGoogleSuccess } from "../controllers/users/Google
 import { paymentGateway } from "../controllers/paymentgateway/payment.js";
 import { ReceivedMessage, SendMessage } from "../controllers/chatControllers/MessageController.js";
 import { createFaq, deleteFaq, getAllFaq, getSingleFaq, updateFaq } from "../controllers/faq/faqControllers.js";
-import { createBlogs, deleteBlogs, getAllBlogs, getSingleBlogs, updateBlogs } from "../controllers/blog/blogsControllers.js";
+import { createBlogs, deleteBlogs, getAllBlogs, getSingleBlogs, updateBlogs } from "../controllers/blog/BlogsControllers.js";
 
 
 
@@ -44,7 +44,7 @@ router.get("/auth/google/callback",passport.authenticate("google",{
 router.get("/login/success",PassGoogleSuccess);
 router.get("/login/failure",PassGoogleFailure)
 
-router.put("/update/user/profile/:id",authUser,updateUserProfile) //authorized user
+router.put("/update/user/profile",authUser,updateUserProfile) //authorized user
 
 router.delete("/deleteuser/:id",authUser,deleteUser) //only for admin 
 router.get("/get/allusers",authUser,getAllUsers) //only for admin  

@@ -243,9 +243,9 @@ export const updateUserProfile = async (req, res) => {
   const { name, gender, mobile, profilepic, address, socialMedia } = req.body;
 
   try {
-    
+    const userId=req.authData.userId;
     // Find the user by ID and update the profile
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(userId);
     if (!user) {
       res.json({ message: "User Not Found" });
     } else {
