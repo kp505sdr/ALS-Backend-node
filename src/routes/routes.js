@@ -6,11 +6,12 @@ import "../controllers/users/passport.js"
 import { ForgetPassword, ResetPassword, deleteUser, getAllUsers, updateUserProfile, userLogin, userRegistration, verifyemail } from "../controllers/users/userControllers.js";
 import authUser from "../middlewares/authUser.js";
 import { Comments, Likes, ReportJob, ReviewsFun, Views, getAllJob, getSingleJob, jobCreate, jobUpade, jobdelete } from "../controllers/job/jobControllers.js";
-import {PassGoogleFailure, PassGoogleSuccess } from "../controllers/users/GooglePass.js";
+import { GoogleLoginSuccess,GoogleLoginFailure} from "../controllers/users/GoogleLoginSuccess.js";
 import { paymentGateway } from "../controllers/paymentgateway/payment.js";
 import { ReceivedMessage, SendMessage } from "../controllers/chatControllers/MessageController.js";
 import { createFaq, deleteFaq, getAllFaq, getSingleFaq, updateFaq } from "../controllers/faq/faqControllers.js";
 import { createBlogs, deleteBlogs, getAllBlogs, getSingleBlogs, updateBlogs } from "../controllers/blog/BlogsControllers.js";
+
 
 
 
@@ -27,7 +28,7 @@ router.post("/user/registration",userRegistration) //public
 router.post("/user/login",userLogin)//public
 
 
-router.get("/verifyemail/:id/:token",verifyemail) //EMAILVERIFICATION
+router.get("/verifyemail/:id/:token",verifyemail) //EMAILVERIFICATION create this page in froentend and call this api
 router.post("/forgetPassword",ForgetPassword)
 router.post("/resetPassword",ResetPassword)
 router.post("/paymentGateway",paymentGateway)
@@ -37,12 +38,12 @@ router.get("/auth/login", passport.authenticate('google', { scope: ['profile', '
 // router.get("/auth/google/callback",CallBackFun)
 
 router.get("/auth/google/callback",passport.authenticate("google",{
-    successRedirect:`${process.env.BASE_URL}/pricing`,  //frontend page
-    failureRedirect:`${process.env.BASE_URL}/login`   //frontend page
+    successRedirect:'http://localhost:3000/dashboard',  //frontend page
+    failureRedirect:'http://localhost:3000/login'   //frontend page 
 }))
 
-router.get("/login/success",PassGoogleSuccess);
-router.get("/login/failure",PassGoogleFailure)
+router.get("/login/success",GoogleLoginSuccess);
+router.get("/login/failure",GoogleLoginFailure)
 
 router.put("/update/user/profile",authUser,updateUserProfile) //authorized user
 
