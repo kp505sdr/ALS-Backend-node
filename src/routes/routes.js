@@ -28,7 +28,7 @@ router.post("/user/registration",userRegistration) //public
 router.post("/user/login",userLogin)//public
 
 
-router.get("/verifyemail/:id/:token",verifyemail) //EMAILVERIFICATION create this page in froentend and call this api
+router.get("/verifyemail/:id/:token",verifyemail) //EMAILVERIFICATION create this page in froentend and call
 router.post("/forgetPassword",ForgetPassword)
 router.post("/resetPassword",ResetPassword)
 router.post("/paymentGateway",paymentGateway)

@@ -6,7 +6,7 @@ export const GoogleLoginSuccess=async(req,res)=>{
 
     let saltRounds=10
      const userData=req?.user?._json
-    
+     
     try { // Check if user already exists in database
         let user = await User.findOne({ email: userData.email });
 
