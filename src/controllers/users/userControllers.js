@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import { check } from "express-validator";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
-
+import {EmailConfig} from "../../models/emailConfigModels.js"
 export const userRegistration = async (req, res) => {
   const saltRounds = 10;
   const { name, email, password, confpassword } = req.body;
@@ -11,32 +11,34 @@ export const userRegistration = async (req, res) => {
   // ------------send mail to verify----start------------
   const sendVerifyMail = async (name, email, id) => {
         //temp token for email verification
+        const emailConfigs = await EmailConfig.find();
         const token = jwt.sign({ email: email }, process.env.JWT_SECRET, {
           expiresIn: "1y",
         });
     try {
+   
       const transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 587,
-        secure: false,
+        host: emailConfigs[0].hostName,     //'smtp.gmail.com'
+        port: emailConfigs[0].portNumber,   // 587
+        secure: true,
         requireTLS: true,
         // pass=fkqy tacy tith clcu
-        service: "gmail",
+        service: emailConfigs[0].serviceName,     //gmail
         auth: {
-          user: "kctech4you@gmail.com",
-          pass: "fkqytacytithclcu",
+           user: emailConfigs[0].serviceEmail,             // "kctech4you@gmail.com"
+          pass: emailConfigs[0].emailPassword,                  // "fkqytacytithclcu"
         },
       });
       const mailOptions = {
-        from: "kctech4you@gmail.com",
+        from: emailConfigs[0].serviceEmail,          //"kctech4you@gmail.com"
         to: email,
-        subject: "For Verification Mail",
-        html:
-          '<p>Hi" ' +
-          name +
-          '  ",Please click on given link to <a href="http://localhost:3000/verify/' +
-          id +'/'+ token +
-          '"> Verify </a> your mail.</p>',
+        subject: "Verification Mail For Active Your Account!",
+        html:`<p>Hi ${name}, Please click on the given link to <a href="http://localhost:3000/verify/${id}/${token}">Verify</a> your Account.</p>`
+          // '<p>Hi" ' +
+          // name +
+          // '  ",Please click on given link to <a href="http://localhost:3000/verify/' +
+          // id +'/'+ token +
+          // '"> Verify </a> your mail.</p>',
       };
       transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
@@ -137,6 +139,7 @@ export const ForgetPassword = async (req, res) => {
     }
 
     // Generate a password reset token
+    const emailConfigs = await EmailConfig.find();
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: '1h' // Set the token expiration time, e.g., 1 hour
     });
@@ -145,15 +148,16 @@ export const ForgetPassword = async (req, res) => {
     const transporter = nodemailer.createTransport({
       // Configure nodemailer transporter (e.g., SMTP, SendGrid, etc.)
       // Example configuration for Gmail SMTP:
-       host: "smtp.gmail.com",
-        port: 587,
-        secure: false,
-        requireTLS: true,
-        service: "gmail",
+      host: emailConfigs[0].hostName,     //'smtp.gmail.com'
+      port: emailConfigs[0].portNumber,   // 587
+      secure: true,
+      requireTLS: true,
+      // pass=fkqy tacy tith clcu
+      service: emailConfigs[0].serviceName,     //gmail
       auth: {
-        user: "kctech4you@gmail.com",
-          pass: "fkqytacytithclcu",
-      }
+         user: emailConfigs[0].serviceEmail,             // "kctech4you@gmail.com"
+        pass: emailConfigs[0].emailPassword,                  // "fkqytacytithclcu"
+      },
     });
 
     const mailOptions = {

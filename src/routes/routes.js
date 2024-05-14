@@ -11,6 +11,7 @@ import { paymentGateway } from "../controllers/paymentgateway/payment.js";
 import { ReceivedMessage, SendMessage } from "../controllers/chatControllers/MessageController.js";
 import { createFaq, deleteFaq, getAllFaq, getSingleFaq, updateFaq } from "../controllers/faq/faqControllers.js";
 import { createBlogs, deleteBlogs, getAllBlogs, getSingleBlogs, updateBlogs } from "../controllers/blog/BlogsControllers.js";
+import { createEmailConfig, deleteEmailConfig, getEmailConfig, updateEmailConfig } from "../controllers/emailConfig/emailConfigController.js";
 
 
 
@@ -87,5 +88,13 @@ router.put("/update-blogs/:id",authUser,updateBlogs)
 router.get("/getall-blogs",getAllBlogs) //public
 router.get("/get-single-blogs/:id",getSingleBlogs) //public
 router.delete("/delete-blogs/:id",authUser,deleteBlogs)
+
+
+//---------------------email-configs------------------------------
+router.post("/create-email-config",createEmailConfig) //admin
+router.get("/get-email-config",getEmailConfig) //admin
+router.put("/update-email-config/:id",updateEmailConfig) //admin
+router.delete("/delete-email-config/:id",deleteEmailConfig) //admin
+
 
 export default router;
