@@ -125,6 +125,9 @@ export const verifyemail = async (req, res) => {
 
 
 
+
+
+
 //-------------------send email for forget password ---------start-----------
 export const ForgetPassword = async (req, res) => {
   try {
@@ -240,6 +243,51 @@ export const getAllUsers = async (req, res) => {
     return res.status(400).json({ message: "Fetching data failed!", error });
   }
 };
+
+// ---------------------------all--user ---end--------------------------------------
+
+
+
+
+//-----------cahnge password---start--------------------------
+export const ChangePassword=async(req,res)=>{
+  const saltRounds = 10;
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const userId = req.authData.userId;
+    // Find the user by ID and update Password
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+    if (!newPassword || !oldPassword) {
+      return res.status(400).json({ message: "Enter the Old and New Password" });
+    }
+
+    const passwordMatch = await bcrypt.compare(oldPassword, user.password);
+
+    if (passwordMatch) {
+      // Hash the new password
+      const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+      
+      // Update the password
+      user.password = hashedPassword;
+      // Save the user
+      await user.save();
+      // Respond with success message
+      return res.send('Password changed successfully');
+    } else {
+      return res.status(401).send('Incorrect old password');
+    }
+  } catch (error) {
+    console.error("Error changing password:", error);
+    return res.status(500).send('Server Error');
+  }
+}
+//-----------cahnge password---end--------------------------
+
+
 
 // -----------------update user profile--------------------------------------------
 

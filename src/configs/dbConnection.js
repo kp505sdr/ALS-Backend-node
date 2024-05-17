@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const dbconnect = async () => {
   try {
     mongoose
-      .connect(process.env.DB_URI, { useUnifiedTopology: true })
+      .connect(process.env.DB_URI)
       .then((data) => {
         console.log(`mongodb connected with server: ${data.connection.host}`);
       });

@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.js",
-    "build": "netlify deploy --prod"
+    "start": "nodemon node index.js"
+
   },
   "author": "karan",
   "license": "ISC",

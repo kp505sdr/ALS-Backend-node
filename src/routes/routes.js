@@ -3,7 +3,7 @@ import express from "express";
 import passport from 'passport';
 import "../controllers/users/passport.js"
 
-import { ForgetPassword, ResetPassword, deleteUser, getAllUsers, updateUserProfile, userLogin, userRegistration, verifyemail } from "../controllers/users/userControllers.js";
+import { ChangePassword, ForgetPassword, ResetPassword, deleteUser, getAllUsers, updateUserProfile, userLogin, userRegistration, verifyemail } from "../controllers/users/userControllers.js";
 import authUser from "../middlewares/authUser.js";
 import { Comments, Likes, ReportJob, ReviewsFun, Views, getAllJob, getSingleJob, jobCreate, jobUpade, jobdelete } from "../controllers/job/jobControllers.js";
 import { GoogleLoginSuccess,GoogleLoginFailure} from "../controllers/users/GoogleLoginSuccess.js";
@@ -31,6 +31,9 @@ router.post("/user/login",userLogin)//public
 
 router.get("/verifyemail/:id/:token",verifyemail) //EMAILVERIFICATION create this page in froentend and call
 router.post("/forgetPassword",ForgetPassword)
+router.put("/changePassword",authUser,ChangePassword)
+
+
 router.post("/resetPassword",ResetPassword)
 router.post("/paymentGateway",paymentGateway)
 
