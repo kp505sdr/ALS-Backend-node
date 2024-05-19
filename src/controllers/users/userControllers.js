@@ -3,42 +3,41 @@ import bcrypt from "bcrypt";
 import { check } from "express-validator";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
-import {EmailConfig} from "../../models/emailConfigModels.js"
+import { EmailConfig } from "../../models/emailConfigModels.js";
 export const userRegistration = async (req, res) => {
   const saltRounds = 10;
   const { name, email, password, confpassword } = req.body;
 
   // ------------send mail to verify----start------------
   const sendVerifyMail = async (name, email, id) => {
-        //temp token for email verification
-        const emailConfigs = await EmailConfig.find();
-        const token = jwt.sign({ email: email }, process.env.JWT_SECRET, {
-          expiresIn: "1y",
-        });
+    //temp token for email verification
+    const emailConfigs = await EmailConfig.find();
+    const token = jwt.sign({ email: email }, process.env.JWT_SECRET, {
+      expiresIn: "1y",
+    });
     try {
-   
       const transporter = nodemailer.createTransport({
-        host: emailConfigs[0].hostName,     //'smtp.gmail.com'
-        port: emailConfigs[0].portNumber,   // 587
+        host: emailConfigs[0].hostName, //'smtp.gmail.com'
+        port: emailConfigs[0].portNumber, // 587
         secure: true,
         requireTLS: true,
         // pass=fkqy tacy tith clcu
-        service: emailConfigs[0].serviceName,     //gmail
+        service: emailConfigs[0].serviceName, //gmail
         auth: {
-           user: emailConfigs[0].serviceEmail,             // "kctech4you@gmail.com"
-          pass: emailConfigs[0].emailPassword,                  // "fkqytacytithclcu"
+          user: emailConfigs[0].serviceEmail, // "kctech4you@gmail.com"
+          pass: emailConfigs[0].emailPassword, // "fkqytacytithclcu"
         },
       });
       const mailOptions = {
-        from: emailConfigs[0].serviceEmail,          //"kctech4you@gmail.com"
+        from: emailConfigs[0].serviceEmail, //"kctech4you@gmail.com"
         to: email,
         subject: "Verification Mail For Active Your Account!",
-        html:`<p>Hi ${name}, Please click on the given link to <a href="http://localhost:3000/verify/${id}/${token}">Verify</a> your Account.</p>`
-          // '<p>Hi" ' +
-          // name +
-          // '  ",Please click on given link to <a href="http://localhost:3000/verify/' +
-          // id +'/'+ token +
-          // '"> Verify </a> your mail.</p>',
+        html: `<p>Hi ${name}, Please click on the given link to <a href="http://localhost:3000/verify/${id}/${token}">Verify</a> your Account.</p>`,
+        // '<p>Hi" ' +
+        // name +
+        // '  ",Please click on given link to <a href="http://localhost:3000/verify/' +
+        // id +'/'+ token +
+        // '"> Verify </a> your mail.</p>',
       };
       transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
@@ -70,14 +69,12 @@ export const userRegistration = async (req, res) => {
             .status(400)
             .json({ message: "Error hashing password" + err });
         }
-    
 
         // Create a new user object
         const userdata = new User({
           name,
           email,
           password: hashPass,
-   
         });
 
         try {
@@ -123,11 +120,6 @@ export const verifyemail = async (req, res) => {
 };
 // ------------------verify mail-- end---------
 
-
-
-
-
-
 //-------------------send email for forget password ---------start-----------
 export const ForgetPassword = async (req, res) => {
   try {
@@ -144,50 +136,53 @@ export const ForgetPassword = async (req, res) => {
     // Generate a password reset token
     const emailConfigs = await EmailConfig.find();
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '1h' // Set the token expiration time, e.g., 1 hour
+      expiresIn: "1h", // Set the token expiration time, e.g., 1 hour
     });
 
     // Send the password reset link to the user's email address
     const transporter = nodemailer.createTransport({
       // Configure nodemailer transporter (e.g., SMTP, SendGrid, etc.)
       // Example configuration for Gmail SMTP:
-      host: emailConfigs[0].hostName,     //'smtp.gmail.com'
-      port: emailConfigs[0].portNumber,   // 587
+      host: emailConfigs[0].hostName, //'smtp.gmail.com'
+      port: emailConfigs[0].portNumber, // 587
       secure: true,
       requireTLS: true,
       // pass=fkqy tacy tith clcu
-      service: emailConfigs[0].serviceName,     //gmail
+      service: emailConfigs[0].serviceName, //gmail
       auth: {
-         user: emailConfigs[0].serviceEmail,             // "kctech4you@gmail.com"
-        pass: emailConfigs[0].emailPassword,                  // "fkqytacytithclcu"
+        user: emailConfigs[0].serviceEmail, // "kctech4you@gmail.com"
+        pass: emailConfigs[0].emailPassword, // "fkqytacytithclcu"
       },
     });
 
     const mailOptions = {
       from: process.env.EMAIL_USERNAME,
       to: email,
-      subject: 'Password Reset',
+      subject: "Password Reset",
       html: `<p>Hi ${user.name},</p>
              <p>Please click <a href="${process.env.BASE_URL}/resetpassword/${token}">here</a> to reset your password.</p>
-             <p>If you didn't request this, please ignore this email.</p>`
+             <p>If you didn't request this, please ignore this email.</p>`,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
-        console.error('Error sending email:', error);
-        return res.status(500).json({ message: 'Failed to send reset password email' });
+        console.error("Error sending email:", error);
+        return res
+          .status(500)
+          .json({ message: "Failed to send reset password email" });
       }
-      console.log('Reset password email sent:', info.response);
-      res.status(200).json({ message: 'Reset password email sent successfully' });
+      console.log("Reset password email sent:", info.response);
+      res
+        .status(200)
+        .json({ message: "Reset password email sent successfully" });
     });
   } catch (error) {
-    console.error('ForgetPassword error:', error.message);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("ForgetPassword error:", error.message);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 //------------------send email for---forget ----pass ---end
-
 
 // ---------------reset----passwor---- and save-----start--------------------
 export const ResetPassword = async (req, res) => {
@@ -199,14 +194,14 @@ export const ResetPassword = async (req, res) => {
 
     // Check if the token contains the userId
     if (!decoded.userId) {
-      return res.status(400).json({ message: 'Invalid token' });
+      return res.status(400).json({ message: "Invalid token" });
     }
 
     // Find the user by userId
     const user = await User.findById(decoded.userId);
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     // Hash the new password
@@ -219,18 +214,19 @@ export const ResetPassword = async (req, res) => {
     // Optionally, you can expire the token after password reset
     // You may want to implement a mechanism to delete the token from the database
 
-    res.status(200).json({ message: 'Password reset successfully' });
+    res.status(200).json({ message: "Password reset successfully" });
   } catch (error) {
-    console.error('ResetPassword error:', error.message);
-    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-      return res.status(400).json({ message: 'Invalid or expired token' });
+    console.error("ResetPassword error:", error.message);
+    if (
+      error.name === "JsonWebTokenError" ||
+      error.name === "TokenExpiredError"
+    ) {
+      return res.status(400).json({ message: "Invalid or expired token" });
     }
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 //reste--pass--and --save ---end-------------------------
-
-
 
 //-------------------get all user-------------------------------------------------
 export const getAllUsers = async (req, res) => {
@@ -246,11 +242,8 @@ export const getAllUsers = async (req, res) => {
 
 // ---------------------------all--user ---end--------------------------------------
 
-
-
-
 //-----------cahnge password---start--------------------------
-export const ChangePassword=async(req,res)=>{
+export const ChangePassword = async (req, res) => {
   const saltRounds = 10;
   try {
     const { oldPassword, newPassword } = req.body;
@@ -259,10 +252,12 @@ export const ChangePassword=async(req,res)=>{
     const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(404).send('User not found');
+      return res.status(404).send("User not found");
     }
     if (!newPassword || !oldPassword) {
-      return res.status(400).json({ message: "Enter the Old and New Password" });
+      return res
+        .status(400)
+        .json({ message: "Enter the Old and New Password" });
     }
 
     const passwordMatch = await bcrypt.compare(oldPassword, user.password);
@@ -270,24 +265,22 @@ export const ChangePassword=async(req,res)=>{
     if (passwordMatch) {
       // Hash the new password
       const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-      
+
       // Update the password
       user.password = hashedPassword;
       // Save the user
       await user.save();
       // Respond with success message
-      return res.send('Password changed successfully');
+      return res.send("Password changed successfully");
     } else {
-      return res.status(401).send('Incorrect old password');
+      return res.status(401).send("Incorrect old password");
     }
   } catch (error) {
     console.error("Error changing password:", error);
-    return res.status(500).send('Server Error');
+    return res.status(500).send("Server Error");
   }
-}
+};
 //-----------cahnge password---end--------------------------
-
-
 
 // -----------------update user profile--------------------------------------------
 
@@ -295,7 +288,7 @@ export const updateUserProfile = async (req, res) => {
   const { name, gender, mobile, profilepic, address, socialMedia } = req.body;
 
   try {
-    const userId=req.authData.userId;
+    const userId = req.authData.userId;
     // Find the user by ID and update the profile
     const user = await User.findById(userId);
     if (!user) {
@@ -373,8 +366,6 @@ export const userLogin = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
-
 
 // ----------------delete user by admin--------------------------
 
