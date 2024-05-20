@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 export const authUser = (req, res, next) => {
   const token = req.headers["authorization"];
 
-  console.log("get token =>", token);
+  // console.log("get token =>", token);
   try {
     if (!token) {
       return res
@@ -51,7 +51,29 @@ export const isAdmin = async (req, res, next) => {
   try {
     const user = await userModel.findById(req.authData.userId);
 
-    if (!user || !user.isAdmin) {
+    if (!user.isAdmin) {
+      return res.status(401).send({
+        success: false,
+        message: "Unauthorized Access",
+      });
+    } else {
+      next();
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      error,
+      message: "Error in admin middleware",
+    });
+  }
+};
+
+export const isUser = async (req, res, next) => {
+  try {
+    const user = await userModel.findById(req.authData.userId);
+
+    if (user.isAdmin) {
       return res.status(401).send({
         success: false,
         message: "Unauthorized Access",

@@ -13,7 +13,7 @@ import {
   userRegistration,
   verifyemail,
 } from "../controllers/users/userControllers.js";
-import { isAdmin, authUser } from "../middlewares/authUser.js";
+import { isAdmin, authUser, isUser } from "../middlewares/authUser.js";
 import {
   Comments,
   Likes,
@@ -62,7 +62,7 @@ router.use(passport.session());
 
 // ---------user routes---------------------------
 // protected route-auth
-router.get("/user-auth", (req, res) => {
+router.get("/user-auth", authUser, isUser, (req, res) => {
   res.status(200).send({ ok: true });
 });
 
