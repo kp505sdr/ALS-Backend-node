@@ -66,6 +66,22 @@ export const getAllBlogs=async(req,res)=>{
         res.status(500).json({ message: 'Internal server error' });
       }
     }
+
+    // -----------------self blog----------------only------------
+    export const getAllSelfBlog=async(req,res)=>{
+      const userId=req.authData.userId; 
+      try {
+        // Find all blog posts created by the logged-in user
+        const blogs = await Blog.find({ userId: userId });
+        
+        res.status(200).json(blogs);
+      } catch (error) {
+        console.error('Error fetching blog posts:', error);
+        res.status(500).json({ message: 'Internal server error' });
+      }
+    }
+    // ---------------------------self blog end---------------------------
+
 // --------------------get single blogs-------------------------------------------------------------
 
 export const getSingleBlogs=async(req,res)=>{

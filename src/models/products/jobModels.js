@@ -49,6 +49,10 @@ const jobSchema = new mongoose.Schema({
     type: String,
     default: "free",
   },
+  status: {
+    type: String,
+    default: "Active",
+  },
   reviews: [{
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     name: String,
@@ -102,6 +106,7 @@ reportedUsers: {
 
   views: {
     type: Number,
+    default:0
   },
   createdBy: [{
     userId: { type: mongoose.Schema.Types.ObjectId,
@@ -114,7 +119,8 @@ reportedUsers: {
     mobile:Number,
     timestamp: { type: Date, default: Date.now }
   }],
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  expDate:{ type: Date, default: 15/10/2024}
   
 });
 

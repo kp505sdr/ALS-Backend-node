@@ -130,12 +130,14 @@ export const verifyemail = async (req, res) => {
 
 //-------------------send email for forget password ---------start-----------
 export const ForgetPassword = async (req, res) => {
+
   try {
     // Assuming you receive the user's email address in the request body
     const { email } = req.body;
+  
 
     // Check if the email exists in the database
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email:email });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -178,7 +180,7 @@ export const ForgetPassword = async (req, res) => {
         return res.status(500).json({ message: 'Failed to send reset password email' });
       }
       console.log('Reset password email sent:', info.response);
-      res.status(200).json({ message: 'Reset password email sent successfully' });
+      res.status(200).json({ message: 'password Reset email sent successfully' });
     });
   } catch (error) {
     console.error('ForgetPassword error:', error.message);
@@ -246,7 +248,24 @@ export const getAllUsers = async (req, res) => {
 
 // ---------------------------all--user ---end--------------------------------------
 
+//--------------------------get-single---user--start-----------------------
+export const getSingleUser=async(req,res)=>{
+  const userId = req.authData.userId;
 
+  try {
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error", error });
+  }
+}
+
+//---------------------------get-single-user--end----------------------
 
 
 //-----------cahnge password---start--------------------------
@@ -254,6 +273,8 @@ export const ChangePassword=async(req,res)=>{
   const saltRounds = 10;
   try {
     const { oldPassword, newPassword } = req.body;
+
+    
     const userId = req.authData.userId;
     // Find the user by ID and update Password
     const user = await User.findById(userId);
