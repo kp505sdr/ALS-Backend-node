@@ -2,14 +2,14 @@ import express from "express";
 import passport from "passport";
 import "../controllers/users/passport.js";
 
-import { ChangePassword, ForgetPassword, ResetPassword, deleteUser, getAllUsers, updateUserProfile, userLogin, userRegistration, verifyemail } from "../controllers/users/userControllers.js";
+import { ChangePassword, ForgetPassword, ResetPassword, deleteUser, getAllUsers, getSingleUser, updateUserProfile, userLogin, userRegistration, verifyemail } from "../controllers/users/userControllers.js";
 import {authUser} from "../middlewares/authUser.js";
 import { Comments, Likes, ReportJob, ReviewsFun, Views, getAllJob, getSingleJob, jobCreate, jobUpade, jobdelete } from "../controllers/job/jobControllers.js";
 import { GoogleLoginSuccess,GoogleLoginFailure} from "../controllers/users/GoogleLoginSuccess.js";
 import { paymentGateway } from "../controllers/paymentgateway/payment.js";
 import { ReceivedMessage, SendMessage } from "../controllers/chatControllers/MessageController.js";
 import { createFaq, deleteFaq, getAllFaq, getSingleFaq, updateFaq } from "../controllers/faq/faqControllers.js";
-import { createBlogs, deleteBlogs, getAllBlogs, getSingleBlogs, updateBlogs } from "../controllers/blog/BlogsControllers.js";
+import { createBlogs, deleteBlogs, getAllBlogs, getAllSelfBlog, getSingleBlogs, updateBlogs } from "../controllers/blog/BlogsControllers.js";
 import { createEmailConfig, deleteEmailConfig, getEmailConfig, updateEmailConfig } from "../controllers/emailConfig/emailConfigController.js";
 
 
@@ -61,6 +61,7 @@ router.get("/login/success", GoogleLoginSuccess);
 router.get("/login/failure", GoogleLoginFailure);
 
 router.put("/update/user/profile",authUser,updateUserProfile) //authorized user
+router.get("/getsingle/user",authUser,getSingleUser) //authorized user
 
 router.delete("/deleteuser/:id",authUser,deleteUser) //only for admin 
 router.get("/get/allusers",authUser,getAllUsers) //only for admin  
@@ -98,6 +99,8 @@ router.put("/update-blogs/:id",authUser,updateBlogs)
 router.get("/getall-blogs",getAllBlogs) //public
 router.get("/get-single-blogs/:id",getSingleBlogs) //public
 router.delete("/delete-blogs/:id",authUser,deleteBlogs)
+router.get("/getall-selfblog",authUser,getAllSelfBlog)
+
 
 
 //---------------------email-configs------------------------------
