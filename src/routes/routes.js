@@ -3,7 +3,7 @@ import passport from "passport";
 import "../controllers/users/passport.js";
 
 import { ChangePassword, ForgetPassword, ResetPassword, deleteUser, getAllUsers, updateUserProfile, userLogin, userRegistration, verifyemail } from "../controllers/users/userControllers.js";
-import authUser from "../middlewares/authUser.js";
+import {authUser} from "../middlewares/authUser.js";
 import { Comments, Likes, ReportJob, ReviewsFun, Views, getAllJob, getSingleJob, jobCreate, jobUpade, jobdelete } from "../controllers/job/jobControllers.js";
 import { GoogleLoginSuccess,GoogleLoginFailure} from "../controllers/users/GoogleLoginSuccess.js";
 import { paymentGateway } from "../controllers/paymentgateway/payment.js";
