@@ -75,6 +75,19 @@ export const getAllJob=async(req,res)=>{
     
     
 }
+// ----------------------get-own -listing------------------------------------------
+export const getAllSelfListing = async (req, res) => {
+  const userId = req.authData.userId;
+  try {
+    // Assuming your model is named JobAd
+    const jobAds = await Job.find({ 'createdBy.userId': userId });
+    res.status(200).json(jobAds);
+  } catch (error) {
+    console.error('Error fetching list posts:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
 
 
 //-------------------------------get---single--------job----------------------------------------------------------------------

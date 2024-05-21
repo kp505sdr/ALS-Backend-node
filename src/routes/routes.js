@@ -4,13 +4,14 @@ import "../controllers/users/passport.js";
 
 import { ChangePassword, ForgetPassword, ResetPassword, deleteUser, getAllUsers, getSingleUser, updateUserProfile, userLogin, userRegistration, verifyemail } from "../controllers/users/userControllers.js";
 import {authUser} from "../middlewares/authUser.js";
-import { Comments, Likes, ReportJob, ReviewsFun, Views, getAllJob, getSingleJob, jobCreate, jobUpade, jobdelete } from "../controllers/job/jobControllers.js";
+import { Comments, Likes, ReportJob, ReviewsFun, Views, getAllJob, getAllSelfListing, getSingleJob, jobCreate, jobUpade, jobdelete } from "../controllers/job/jobControllers.js";
 import { GoogleLoginSuccess,GoogleLoginFailure} from "../controllers/users/GoogleLoginSuccess.js";
 import { paymentGateway } from "../controllers/paymentgateway/payment.js";
 import { ReceivedMessage, SendMessage } from "../controllers/chatControllers/MessageController.js";
 import { createFaq, deleteFaq, getAllFaq, getSingleFaq, updateFaq } from "../controllers/faq/faqControllers.js";
 import { createBlogs, deleteBlogs, getAllBlogs, getAllSelfBlog, getSingleBlogs, updateBlogs } from "../controllers/blog/BlogsControllers.js";
 import { createEmailConfig, deleteEmailConfig, getEmailConfig, updateEmailConfig } from "../controllers/emailConfig/emailConfigController.js";
+import authAdmin from "../middlewares/authAdmin.js";
 
 
 
@@ -63,15 +64,17 @@ router.get("/login/failure", GoogleLoginFailure);
 router.put("/update/user/profile",authUser,updateUserProfile) //authorized user
 router.get("/getsingle/user",authUser,getSingleUser) //authorized user
 
-router.delete("/deleteuser/:id",authUser,deleteUser) //only for admin 
-router.get("/get/allusers",authUser,getAllUsers) //only for admin  
+router.delete("/deleteuser/:id",authAdmin,deleteUser) //only for admin 
+router.get("/get/allusers",authAdmin,getAllUsers) //only for admin  
 
 
 //---------------Create--job-----routes------------
 router.post("/job/create", authUser, jobCreate); //authorized user
 router.put("/job/update/:id", authUser, jobUpade); //authorized user
-router.get("/job/get", authUser, getAllJob); //authorized user
+router.get("/job/get", getAllJob); //public 
 router.get("/job/getsingle/:id", authUser, getSingleJob);
+router.get("/job/get-allSelf-listing",authUser,getAllSelfListing);
+
 router.delete("/job/delete/:id", authUser, jobdelete); //authorized user
 
 //---------------Like,Comment and Views-------------------------
@@ -87,11 +90,11 @@ router.post("/send-message/:id", authUser, SendMessage);
 router.get("/received-message/:id", authUser, ReceivedMessage);
 
 //-------------------------------FAQ-- only for admin -------------------------------------------
-router.post("/create-faq",authUser,createFaq);
-router.get("/getall-faq",authUser,getAllFaq);
-router.get("/get-single-faq/:id",authUser,getSingleFaq);
-router.put("/update-faq/:id",authUser,updateFaq);
-router.delete("/delete-faq/:id",authUser,deleteFaq);
+router.post("/create-faq",authAdmin,createFaq);
+router.get("/getall-faq",getAllFaq);   //public
+router.get("/get-single-faq/:id",authAdmin,getSingleFaq);
+router.put("/update-faq/:id",authAdmin,updateFaq);
+router.delete("/delete-faq/:id",authAdmin,deleteFaq);
 
 // -----------------------------------Blogs----------------------------
 router.post("/create-blogs",authUser,createBlogs)
@@ -104,10 +107,10 @@ router.get("/getall-selfblog",authUser,getAllSelfBlog)
 
 
 //---------------------email-configs------------------------------
-router.post("/create-email-config",createEmailConfig) //admin
-router.get("/get-email-config",getEmailConfig) //admin
-router.put("/update-email-config/:id",updateEmailConfig) //admin
-router.delete("/delete-email-config/:id",deleteEmailConfig) //admin
+router.post("/create-email-config",authAdmin,createEmailConfig) //admin
+router.get("/get-email-config",authAdmin,getEmailConfig) //admin
+router.put("/update-email-config/:id",authAdmin,updateEmailConfig) //admin
+router.delete("/delete-email-config/:id",authAdmin,deleteEmailConfig) //admin
 
 
 export default router;
