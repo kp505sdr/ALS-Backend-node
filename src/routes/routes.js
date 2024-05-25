@@ -12,6 +12,7 @@ import { createFaq, deleteFaq, getAllFaq, getSingleFaq, updateFaq } from "../con
 import { createBlogs, deleteBlogs, getAllBlogs, getAllSelfBlog, getSingleBlogs, updateBlogs } from "../controllers/blog/BlogsControllers.js";
 import { createEmailConfig, deleteEmailConfig, getEmailConfig, updateEmailConfig } from "../controllers/emailConfig/emailConfigController.js";
 import authAdmin from "../middlewares/authAdmin.js";
+import {upload} from "../configs/Multer.js";
 
 
 
@@ -74,7 +75,6 @@ router.put("/job/update/:id", authUser, jobUpade); //authorized user
 router.get("/job/get", getAllJob); //public 
 router.get("/job/getsingle/:id", authUser, getSingleJob);
 router.get("/job/get-allSelf-listing",authUser,getAllSelfListing);
-
 router.delete("/job/delete/:id", authUser, jobdelete); //authorized user
 
 //---------------Like,Comment and Views-------------------------
@@ -97,7 +97,7 @@ router.put("/update-faq/:id",authAdmin,updateFaq);
 router.delete("/delete-faq/:id",authAdmin,deleteFaq);
 
 // -----------------------------------Blogs----------------------------
-router.post("/create-blogs",authUser,createBlogs)
+router.post("/create-blogs",authUser,upload.array("file",4),createBlogs)
 router.put("/update-blogs/:id",authUser,updateBlogs)
 router.get("/getall-blogs",getAllBlogs) //public
 router.get("/get-single-blogs/:id",getSingleBlogs) //public

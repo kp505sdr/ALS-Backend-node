@@ -33,6 +33,9 @@ const jobSchema = new mongoose.Schema({
   url: {
     type: String,
   },
+  city: {
+    type: String,
+  },
   adExpDate: {
     type: Date,
   },
@@ -41,6 +44,7 @@ const jobSchema = new mongoose.Schema({
     type: Array,
     default: ['job'], 
   },
+
   isPaidAds: {
     type: Boolean,
     default: false,
@@ -51,7 +55,7 @@ const jobSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    default: "Active",
+    default: "inactive",
   },
   reviews: [{
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

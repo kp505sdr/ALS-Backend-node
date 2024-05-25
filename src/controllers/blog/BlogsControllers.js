@@ -1,24 +1,28 @@
 import Blog from "../../models/products/blogModels.js"
 import User from "../../models/userModels.js";
-
-
-// ---------------------create--blogs------------------------
 export const createBlogs=async(req,res)=>{
-    const {title,blogsDetails,image } = req.body;
-    const userId=req.authData.userId; 
+  
+  const { title, blogsDetails, file } = req.body;
+  const userId = req.authData.userId;
+
   try {
+    // Check if the user exists
     const userProfile = await User.findById(userId);
     if (!userProfile) {
       return res.status(404).json({ message: 'User not found' });
     }
+
+    // Convert the file to binary data
+    const fileData = Buffer.from(file, 'base64'); // Assuming the file is in base64 format
+
     // Create a new blog instance using the Blog model
     const newBlog = new Blog({
-      userId:userProfile._id,
-      name:userProfile.name,
-      profilepic:userProfile.profilepic,
+      userId: userProfile._id,
+      name: userProfile.name,
+      profilepic: userProfile.profilepic,
       title,
       blogsDetails,
-      image,
+      file: fileData,
       timestamp: new Date()
     });
 
@@ -31,6 +35,10 @@ export const createBlogs=async(req,res)=>{
     res.status(500).json({ message: 'Internal server error' });
   }
 }
+
+// ---------------------create--blogs------------------------
+
+
 
 
 // -------------------update-blogs------------------------------------------------------------------
@@ -69,6 +77,7 @@ export const getAllBlogs=async(req,res)=>{
 
     // -----------------self blog----------------only------------
     export const getAllSelfBlog=async(req,res)=>{
+    
       const userId=req.authData.userId; 
       try {
         // Find all blog posts created by the logged-in user
